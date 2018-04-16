@@ -3,6 +3,6 @@ CS359 projects
 
 ## Group members:
 
-- Yifeng Zhou
+- Yifeng Gao
 - Zhixin Ling
 - Chacha Chen
