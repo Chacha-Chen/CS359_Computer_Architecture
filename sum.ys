@@ -1,0 +1,50 @@
+#Execution begins at address 0
+	.pos	0
+Init:
+	irmovl	Stack, %esp		#Initialize stack pointer
+	irmovl	Stack, %ebp
+	jmp		Main
+	halt
+
+.align	4
+ele1:
+		.long 0x00a
+		.long ele2
+ele2:
+		.long 0x0b0
+		.long ele3
+ele3:	
+		.long 0xc00
+		.long 0
+
+Main:
+		irmovl	ele1,%esi	#starting pointer
+		pushl	%esi
+		call sum_list	
+		halt
+
+sum_list:
+		pushl	%ebp
+		rrmovl	%esp, %ebp	#read the stack pointer
+		pushl	%ebx		#save sbx
+		pushl	%edx		#save sdx
+		pushl	%esi		#save esi
+		mrmovl	8(%ebp),%ebx	#ebx = starting pointer ele1
+		irmovl	$0,%eax
+loop:	mrmovl	0(%ebx),%edx	#The number
+		addl	%edx,%eax
+		mrmovl	4(%ebx), %esi	#4(%ebx) is address of next node
+		irmovl	$0,%edx
+		addl	%edx,%esi
+		je		done		#If the pointer points to zero, return
+		rrmovl	%esi,%ebx
+		jmp		loop
+done:	popl	%esi		#restore the registers
+		popl	%edx
+		popl	%ebx
+		rrmovl	%ebp, %esp
+		popl	%ebp
+		ret
+		.pos	0x400
+Stack:
+
