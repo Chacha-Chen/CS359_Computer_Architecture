@@ -7,25 +7,19 @@ Init:
 	halt
 
 .align	4
-src:
-	.long	0x00a
-	.long	0x0b0
-	.long	0xc00
-dest:
-	.long	0x111
-	.long	0x222
-	.long	0x333
-result:
-	.long	0
+ele1:
+		.long 0x00a
+		.long ele2
+ele2:
+		.long 0x0b0
+		.long ele3
+ele3:	
+		.long 0xc00
+		.long 0
+
 
 Main:
-		irmovl	result,%esi	#result
-		pushl	%esi
-		irmovl	src,%esi	#src
-		pushl	%esi
-		irmovl	dest,%esi	#dest
-		pushl	%esi
-		irmovl	3,%esi		#len
+		irmovl	ele1,%esi	#p_ele1
 		pushl	%esi
 		call copy_list	
 		halt
@@ -33,44 +27,30 @@ Main:
 copy_list:
 		pushl	%ebp
 		rrmovl	%esp, %ebp	#read the stack pointer
-		pushl	%eax		#save eax
 		pushl	%ebx		#save sbx
 		pushl	%ecx		#save ecx
 		pushl	%edx		#save sdx
 		pushl	%esi		#save esi
-		mrmovl	8(%ebp),%eax	#eax=p_len
-		mrmovl	0(%eax),%eax	#eax=len,len-1,...,0
-		mrmovl	20(%ebp),%edx	#edx=p_result
-		irmovl	$0,%ebx			#tmp=0
-		irmovl	$0,%ecx			#ecx=0
-		irmovl	$0,%esi			#esi=0,4,8...
-
-loop:	
-		mrmovl	16(%ebp),%edx	#edx = p_src
-		addl	%esi,%edx		#edx = p_src_cur
-		mrmovl	0(%edx),%edx	#edx = src_cur
-		xorl	%edx,%ecx		#result ^= src_cur
-
-		mrmovl	12(%ebp),%ebx	#ebx = p_dest
-		addl	%esi,%ebx		#ebx = p_dest_cur
-		rmmovl	%edx,0(%ebx)	#*p_dest_cur = src_cur
-
-		irmovl  $1,%ebx			#eax-=1
-		subl	%ebx,%eax		#subl	%ebx,%eax -> eax = eax - ebx
-		je		done
-		irmovl	$4,%ebx			#tmp = 4
-		addl	%ebx,%esi		#esi+=tmp
-		jmp		loop
-done:	rmmovl	%ecx,20(%ebp)	#*p_result = ecx
+		mrmovl	8(%ebp),%edx	#edx=p_ele[i]
+		mrmovl	0(%edx),%eax	#eax=ele[i]
+		mrmovl	4(%edx),%ebx	#ebx=p_ele[i+1]
+		andl	%ebx, %ebx	#if p_ele[i+1] == 0
+		je  	done		#return ele[i]
+		pushl	%ebx		#else: p_ele[i+1]
+		rrmovl  %eax, %ecx	#ecx = ele[i]
+		call 	copy_list
+		popl	%edx		#restore the stack pointer
+		addl	%ecx,%eax	#eax += rsum(p_ele[i+1])
+done:					#return
 		popl	%esi			#restore the registers
 		popl	%edx
 		popl 	%ecx
 		popl	%ebx
-		popl	%eax
 		rrmovl	%ebp, %esp
 		popl	%ebp
 		ret
 
 		.pos	0x120
 Stack:
+
 
