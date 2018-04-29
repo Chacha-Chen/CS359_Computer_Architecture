@@ -27,7 +27,7 @@
  frame =shadowbox,
  framerule=0.5pt,
  keepspaces=true,
- keywordstyle=\color{blue}\bfseries, % keyword style
+ %keywordstyle=\color{blue}\bfseries, % keyword style
  language = Verilog,      % the language of code
  otherkeywords={string},
  numbers=left,
@@ -61,9 +61,9 @@
 
 \title{\textbf{Project 1: Optimizing the Performance of a Pipelined Processor}} % Title
 
-\author{000, x, x-email \\
-        001, y, y-email \\
-        002, z, z-email } % Author name and email
+\author{515021910302, Chacha Chen, chachachen1997@gmail.com \\
+        001, Yifeng Gao, y-email \\
+        002, Zhixin Ling, z-email, group leader } % Author name and email
 
 \date{\today} % Date for the report
 
@@ -74,14 +74,16 @@
 
 \section{Introduction}
 
-[In this section you should briefly introduce the task in your own words, and what you’ve done in this project. A simple copy from project1.pdf is not permitted.] \\
+Throughout this lab, we learned about the design and implementation of a pipelined Y86 processor, optimizing both it and a benchmark program to maximize performance. After this lab, not only did we all have a keen appreciation for the interactions between code and hardware that affect the performance of your programs, but also became more familier with linux operations and computer architecture etc.
 
-\noindent[You should also list the arrangement of each member here. For example, you can write, “student-x finished part A and B, student-y finished part C and student-z finished the report” (of course we suggest each student to make contributions to coding tasks.)]
+In part A, we implemented 3 basic functions using assembly language and in part B,.......in part C.......
+
+\noindent\textbf{Arrangement:}
+[You should also list the arrangement of each member here. For example, you can write, “student-x finished part A and B, student-y finished part C and student-z finished the report” (of course we suggest each student to make contributions to coding tasks.)]
+
 
 \section{Experiments}
-
-[This is the main part of your report. It includes three parts and in each part, you need to write concretely, logically but not in full details.]
-
+The experiment includes 3 parts.
 
 \subsection{Part A}
 
@@ -113,11 +115,10 @@ This most of the code is similar to the code in sum.ys, except that it should us
 \begin{itemize}
 \item The initialization step is similar to the above implementations.
 \item In Main: firstly, the store the src, dest and len into main function stack frame for future use. After these preliminaries, copy block function is called. After returning from copy block, we need to resume the esp and ebp to the initial value set in init part and this is done by "done" function part as similar to above implementations. Finally Main function is returned.
-\item Copy\_block: In copy block, firstly we do the conventions like saving a copy of caller’s ebp and set ebp to the beginning of copy block ’s stack frame. Then we use 3 registers \%ebx \%ecx, \%esi to store temporary needed values for iteration. 
+\item copy\_block: In copy block, firstly we do the conventions like saving a copy of caller’s ebp and set ebp to the beginning of copy block ’s stack frame. Then we use 3 registers \%ebx \%ecx, \%esi to store temporary needed values for iteration. Also, \%eax, the stored length, is subtracted by 1 and a conditional jump instruction was added to terminated the loop when the length is equal to zero. In each iteration, we copy the value stored in the current source block to the current destination block. The addresses of both is calculated by a increment factor \%esi added to the current address(\%edx for src and \%ebc for dest).
 
-Then set eax to 0, as we use it to store the result. Next we get the pre-stored address of src and dest in Mains frame by using ebp with offset of 8 and 12 respectively. And we set ecx to 3 as used to count the iteration. Now we can get into the loop. In the loop, we need to copy data from src(stored in (\%esi)) to dest(stored in(\%edx)), then update edx, esi and ecx. When ecx goes down to 0, the iteration can stop. Finally, we resume the esp and ebp of Main, and return to Main.
+Finally, we resume the esp and ebp and return.
 \end{itemize}
-
 
 \end{itemize}
 \subsubsection{Code}
@@ -125,15 +126,15 @@ Then set eax to 0, as we use it to store the result. Next we get the pre-stored 
 \item \textbf{sum.ys}
   \begin{lstlisting}[caption={}]
 #Execution begins at address 0
-	.pos	0
+	.pos	0			#start address for all Y86 programs
 Init:
 	irmovl	Stack, %esp		#Initialize stack pointer
-	irmovl	Stack, %ebp
-	jmp		Main
+	irmovl	Stack, %ebp		#Initialize base pointer
+	jmp	Main
 	halt
 
 .align	4
-ele1:
+ele1:					#Elements initialization
 		.long 0x00a
 		.long ele2
 ele2:
@@ -152,36 +153,31 @@ Main:
 sum_list:
 		pushl	%ebp
 		rrmovl	%esp, %ebp	#read the stack pointer
-		pushl	%ebx		#save sbx
-		pushl	%edx		#save sdx
-		pushl	%esi		#save esi
-		mrmovl	8(%ebp),%ebx	#ebx = starting pointer ele1
-		irmovl	$0,%eax
-loop:	mrmovl	0(%ebx),%edx	#The number
+		mrmovl	8(%ebp),%ebx	#ebx = start pointer ele1
+		irmovl	$0,%eax		#sum=0
+loop:		mrmovl	(%ebx),%edx	#The element
 		addl	%edx,%eax
 		mrmovl	4(%ebx), %esi	#4(%ebx) is address of next node
-		irmovl	$0,%edx
-		addl	%edx,%esi
-		je		done		#If the pointer points to zero return
+		andl 	%esi, %esi 	#if %esi=zero,jump to done
+		je		done	#If the pointer points to zero, return
 		rrmovl	%esi,%ebx
 		jmp		loop
-done:	popl	%esi		#restore the registers
+done:		popl	%esi		#restore the registers
 		popl	%edx
 		popl	%ebx
 		rrmovl	%ebp, %esp
 		popl	%ebp
-		ret
+		ret  
+#stack starts here and grows to lower addresses
 		.pos	0x400
 Stack:
 
-
-   \end{lstlisting}
+ \end{lstlisting}
 
 
 \item \textbf{rsum.ys}
   \begin{lstlisting}[caption={}]
-
-#Execution begins at address 0
+ #Execution begins at address 0
 	.pos	0
 Init:
 	irmovl	Stack, %esp		#Initialize stack pointer
@@ -190,82 +186,65 @@ Init:
 	halt
 
 .align	4
-src:
-	.long	0x00a
-	.long	0x0b0
-	.long	0xc00
-dest:
-	.long	0x111
-	.long	0x222
-	.long	0x333
-result:
-	.long	0
+ele1:
+		.long 0x00a
+		.long ele2
+ele2:
+		.long 0x0b0
+		.long ele3
+ele3:	
+		.long 0xc00
+		.long 0
+
 
 Main:
-		irmovl	result,%esi	#result
+		irmovl	ele1,%esi	#p_ele1
 		pushl	%esi
-		irmovl	src,%esi	#src
-		pushl	%esi
-		irmovl	dest,%esi	#dest
-		pushl	%esi
-		irmovl	3,%esi		#len
-		pushl	%esi
-		call copy_list	
+		xorl    %eax, %eax	#set eax=0
+		call rsum_list	
 		halt
 
-copy_list:
+rsum_list:
 		pushl	%ebp
 		rrmovl	%esp, %ebp	#read the stack pointer
-		pushl	%eax		#save eax
-		pushl	%ebx		#save sbx
+		pushl	%ebx		#save ebx
 		pushl	%ecx		#save ecx
-		pushl	%edx		#save sdx
+		pushl	%edx		#save edx
 		pushl	%esi		#save esi
-		mrmovl	8(%ebp),%eax	#eax=p_len
-		mrmovl	0(%eax),%eax	#eax=len,len-1,...,0
-		mrmovl	20(%ebp),%edx	#edx=p_result
-		irmovl	$0,%ebx			#tmp=0
-		irmovl	$0,%ecx			#ecx=0
-		irmovl	$0,%esi			#esi=0,4,8...
-
-loop:	
-		mrmovl	16(%ebp),%edx	#edx = p_src
-		addl	%esi,%edx		#edx = p_src_cur
-		mrmovl	0(%edx),%edx	#edx = src_cur
-		xorl	%edx,%ecx		#result ^= src_cur
-
-		mrmovl	12(%ebp),%ebx	#ebx = p_dest
-		addl	%esi,%ebx		#ebx = p_dest_cur
-		rmmovl	%edx,0(%ebx)	#*p_dest_cur = src_cur
-
-		irmovl  $1,%ebx			#eax-=1
-		subl	%ebx,%eax		#subl	%ebx,%eax -> eax = eax - ebx
-		je		done
-		irmovl	$4,%ebx			#tmp = 4
-		addl	%ebx,%esi		#esi+=tmp
-		jmp		loop
-done:	rmmovl	%ecx,20(%ebp)	#*p_result = ecx
+		mrmovl	8(%ebp),%edx	#edx=p_ele[i]
+		mrmovl	0(%edx),%eax	#eax=ele[i]
+		mrmovl	4(%edx),%ebx	#ebx=p_ele[i+1]
+		andl	%ebx, %ebx	#if p_ele[i+1] == 0
+		je  	done		#return ele[i]
+		pushl	%ebx		#else: 8(%ebp)=p_ele[i+1]
+		rrmovl  %eax, %ecx	#ecx = ele[i]
+		call 	rsum_list
+		popl	%edx		#restore the stack pointer
+		addl	%ecx,%eax	#eax += rsum(p_ele[i+1])
+done:					#return
 		popl	%esi			#restore the registers
 		popl	%edx
 		popl 	%ecx
 		popl	%ebx
-		popl	%eax
 		rrmovl	%ebp, %esp
 		popl	%ebp
 		ret
 
 		.pos	0x120
 Stack:
-   \end{lstlisting}
+ 
+
+
+\end{lstlisting}
 
 \item \textbf{copy.ys}
   \begin{lstlisting}[caption={}]
 #Execution begins at address 0
 	.pos	0
 Init:
-	irmovl	Stack, %esp		#Initialize stack pointer
+	irmovl	Stack, %esp			#Initialize stack pointer
 	irmovl	Stack, %ebp
-	jmp		Main
+	jmp	Main
 	halt
 
 .align	4
@@ -280,35 +259,35 @@ dest:
 
 
 Main:
-		irmovl	src,%esi	#src
+		irmovl	src,%esi		#src
 		pushl	%esi
-		irmovl	dest,%esi	#dest
+		irmovl	dest,%esi		#dest
 		pushl	%esi
-		irmovl	$3,%esi		#len
+		irmovl	$3,%esi			#len
 		pushl	%esi
-		call copy_list	
+		call copy_block	
 		halt
 
-copy_list:
+copy_block:
 		pushl	%ebp
-		rrmovl	%esp, %ebp	#read the stack pointer
-		pushl	%ebx		#save sbx
-		pushl	%ecx		#save ecx
-		pushl	%edx		#save sdx
-		pushl	%esi		#save esi
-		mrmovl	8(%ebp),%eax	#eax=len,len-1,...,0
+		rrmovl	%esp, %ebp		#read the stack pointer
+		pushl	%ebx			#save ebx
+		pushl	%ecx			#save ecx
+		pushl	%edx			#save edx
+		pushl	%esi			#save esi
+		mrmovl	8(%ebp),%eax		#eax=len,len-1,...,0
 		irmovl	$0,%ebx			#tmp=0
 		irmovl	$0,%ecx			#ecx=0
 		irmovl	$0,%esi			#esi=0,4,8...
 loop:	
-		mrmovl	16(%ebp),%edx	#edx = p_src
+		mrmovl	16(%ebp),%edx		#edx = p_src
 		addl	%esi,%edx		#edx = p_src_cur
-		mrmovl	0(%edx),%edx	#edx = src_cur
+		mrmovl	0(%edx),%edx		#edx = src_cur
 		xorl	%edx,%ecx		#result ^= src_cur
 
-		mrmovl	12(%ebp),%ebx	#ebx = p_dest
+		mrmovl	12(%ebp),%ebx		#ebx = p_dest
 		addl	%esi,%ebx		#ebx = p_dest_cur
-		rmmovl	%edx,0(%ebx)	#*p_dest_cur = src_cur
+		rmmovl	%edx,0(%ebx)		#*p_dest_cur = src_cur
 
 		irmovl  $1,%ebx			#eax-=1
 		subl	%ebx,%eax		#subl	%ebx,%eax -> eax = eax - ebx
@@ -316,7 +295,7 @@ loop:
 		irmovl	$4,%ebx			#tmp = 4
 		addl	%ebx,%esi		#esi+=tmp
 		jmp		loop
-done:	rrmovl	%ecx,%eax
+done:		rrmovl	%ecx,%eax
 		popl	%esi			#restore the registers
 		popl	%edx
 		popl 	%ecx
@@ -328,33 +307,339 @@ done:	rrmovl	%ecx,%eax
 		.pos	0x120
 Stack:
 
-
-   \end{lstlisting}
+\end{lstlisting}
 \end{itemize}
+
+
 \subsubsection{Evaluation}
 
-[In this part, you should place the figures of experiments for your codes, prove the correctness and validate the performance with your own words for each figure’s explanation.]
+
+\begin{itemize}
+\item \textbf{sum.ys}
+
+\includegraphics[width=0.95\textwidth]{A-sum.png}
+\includegraphics[width=0.95\textwidth]{sum.png}
+As is shown above, our implementation can be seen as successful.
+
+\item \textbf{rsum.ys}
+
+\includegraphics[width=0.95\textwidth]{A-rsum.png}
+\includegraphics[width=0.95\textwidth]{rsum.png}
+As is shown above, our implementation can be seen as successful.
+
+\item \textbf{copy.ys}
+
+\includegraphics[width=0.95\textwidth]{copy.png}
+As is shown above, our implementation can be seen as successful.
+
+\end{itemize}
+
+Target register is returned with correct value and also, from the GUI interface, we could see the performance of CPU as well as the decoded machine language denoted by hexadecimal numbers.
 
 \subsection{Part B}
-
+An operation $iaddl$ added to the control file \textit{seq−full.hcl} to extend the SEQ processor is required in this part.
 \subsubsection{Analysis}
+To add $iaddl$ to the SEQ processor, the steps is as follows:
 
-To add IIADDL to the SEQ processor,we need to know the whole steps that the iaddl operation takes. From the textbook we can know all steps of this operation.
-The steps above is that:
-Firstly, we need to get the icode and ifun which conbine a byte, and we can use M1[PC] to get the first byte.
-Secondly, we need to get which register we begi to use, and we can use M 1[P C + 1] to get the second byte which contains two registers tags.
-Thirdly, we get the rest of the instruction to get the instant value. Then, we begin to decode the instruction which we will get the value in the register and store it in the valB.
-Forthly, we do the add operation which is in the execute step.
-Fifthly, we write the result back to the register and Finally we update the PC to prepare for the next instruction.
+\begin{enumerate}
+\item $M_1[PC]$ is used to get the icode and ifun which conbine a byte.
+\item  we need to get which register we begi to use, and we can use M 1[P C + 1] to get the second byte which contains two registers tags.
+Thirdly, we get the rest of the instruction to get the instant value. 
+\item Decode the instruction by which we could get the value in the register and store it in the valB.
+\item Execute the add operation.
+\item Write the result back to the register and Finally update the PC to prepare for the next instruction.
+\end{enumerate}
+
 
 \subsubsection{Code}
+  \begin{lstlisting}[caption={}]
+#/* $begin seq-all-hcl */
+####################################################################
+#Descriptions:                                                     #
+#1.iaddl(6bytes) c0 FrB vv vv vv vv    2.leave(1byte) d0           #
+#  result:rB += ConstV                    result:%esp=%ebp+4;      #
+#F: icode:ifun<- M1[PC]                          %ebp=M[%ebp]      #
+#   rA:rB<-M1[PC+1]                     F: icode:ifun<-M1[PC]      #
+#   valC<-M4[PC+2]                         valP<-PC+1              #
+#   valP<-PC+6                          D: valA<-R[%esp]           #
+#D: valB<-R[rB]                         E: valE<-valA+4            #
+#E: valE<-valB+valC                     M: valM<-M[%ebp]           #
+#M:                                     WB:R[%esp]<-valE           #
+#WB:R[rB]<-valE                            R[%ebp]<-valM           #
+####################################################################
+#iaddl Details:							   						   #
+# iaddl is similar to both addl and irmovl. Actually we can replace#
+# this instruction with a combination of irmovl and addl. So we can#
+# refer to IIRMOVL and IOPL to implement IIADDL. Here are the 	   #
+# the related modifications below.		   #
+# 1.instr_vali							   #
+# 2.need_regids							   #
+# 3.need_valC							   # 
+# 4.srcB - rB							   # 
+# 5.dstE - rB							   # 
+# 6.aluA - valC							   # 
+# 7.aluB - valB							   # 
+# 8.set_cc							   	   # 
+#leave Details:							   # 
+# leave is a little more complicated. But by careful analysis, we  #
+# can have it implemented with some modifications below.  	   	   #
+# 1.instr_vali							   # 
+# 2.need_regids							   # 
+# 3.srcA - REBP							   # 
+# 4.dstE - RESP							   # 
+# 5.dstM - REBP							   # 
+# 6.aluA - valA							   # 
+# 7.aluB - 4							   # 
+# 8.mem_read							   # 
+# 9.mem_addr - valA						   # 
+####################################################################
+####################################################################
 
-[In this part, you should place your code and make it readable in Latex, please. Writing necessary comments for codes is a good habit.]
+
+####################################################################
+#    C Include's.  Don't alter these                               #
+####################################################################
+
+quote '#include <stdio.h>'
+quote '#include "isa.h"'
+quote '#include "sim.h"'
+quote 'int sim_main(int argc, char *argv[]);'
+quote 'int gen_pc(){return 0;}'
+quote 'int main(int argc, char *argv[])'
+quote '  {plusmode=0;return sim_main(argc,argv);}'
+
+####################################################################
+#    Declarations.  Do not change/remove/delete any of these       #
+####################################################################
+
+##### Symbolic representation of Y86 Instruction Codes #############
+intsig INOP 	'I_NOP'
+intsig IHALT	'I_HALT'
+intsig IRRMOVL	'I_RRMOVL'
+intsig IIRMOVL	'I_IRMOVL'
+intsig IRMMOVL	'I_RMMOVL'
+intsig IMRMOVL	'I_MRMOVL'
+intsig IOPL	'I_ALU'
+intsig IJXX	'I_JMP'
+intsig ICALL	'I_CALL'
+intsig IRET	'I_RET'
+intsig IPUSHL	'I_PUSHL'
+intsig IPOPL	'I_POPL'
+# Instruction code for iaddl instruction
+intsig IIADDL	'I_IADDL'
+# Instruction code for iaddl instruction
+intsig ILEAVE	'I_LEAVE'
+
+##### Symbolic represenations of Y86 function codes                  #####
+intsig FNONE    'F_NONE'        # Default function code
+
+##### Symbolic representation of Y86 Registers referenced explicitly #####
+intsig RESP     'REG_ESP'    	# Stack Pointer
+intsig REBP     'REG_EBP'    	# Frame Pointer
+intsig RNONE    'REG_NONE'   	# Special value indicating "no register"
+
+##### ALU Functions referenced explicitly                            #####
+intsig ALUADD	'A_ADD'		# ALU should add its arguments
+
+##### Possible instruction status values                             #####
+intsig SAOK	'STAT_AOK'		# Normal execution
+intsig SADR	'STAT_ADR'	# Invalid memory address
+intsig SINS	'STAT_INS'	# Invalid instruction
+intsig SHLT	'STAT_HLT'	# Halt instruction encountered
+
+##### Signals that can be referenced by control logic ####################
+
+##### Fetch stage inputs		#####
+intsig pc 'pc'				# Program counter
+##### Fetch stage computations		#####
+intsig imem_icode 'imem_icode'		# icode field from instruction memory
+intsig imem_ifun  'imem_ifun' 		# ifun field from instruction memory
+intsig icode	  'icode'		# Instruction control code
+intsig ifun	  'ifun'		# Instruction function
+intsig rA	  'ra'			# rA field from instruction
+intsig rB	  'rb'			# rB field from instruction
+intsig valC	  'valc'		# Constant from instruction
+intsig valP	  'valp'		# Address of following instruction
+boolsig imem_error 'imem_error'		# Error signal from instruction memory
+boolsig instr_valid 'instr_valid'	# Is fetched instruction valid?
+
+##### Decode stage computations		#####
+intsig valA	'vala'			# Value from register A port
+intsig valB	'valb'			# Value from register B port
+
+##### Execute stage computations	#####
+intsig valE	'vale'			# Value computed by ALU
+boolsig Cnd	'cond'			# Branch test
+
+##### Memory stage computations		#####
+intsig valM	'valm'			# Value read from memory
+boolsig dmem_error 'dmem_error'		# Error signal from data memory
+
+
+####################################################################
+#    Control Signal Definitions.                                   #
+####################################################################
+
+################ Fetch Stage     ###################################
+
+# Determine instruction code
+int icode = [
+	imem_error: INOP;
+	1: imem_icode;		# Default: get from instruction memory
+];
+
+# Determine instruction function
+int ifun = [
+	imem_error: FNONE;
+	1: imem_ifun;		# Default: get from instruction memory
+];
+
+bool instr_valid = icode in
+	{ INOP, IHALT, IRRMOVL, IIRMOVL, IRMMOVL, IMRMOVL, IIADDL, ILEAVE,
+	       IOPL, IJXX, ICALL, IRET, IPUSHL, IPOPL };
+
+# Does fetched instruction require a regid byte?
+bool need_regids =
+	icode in { IRRMOVL, IOPL, IPUSHL, IPOPL, IIADDL, ILEAVE,
+		     IIRMOVL, IRMMOVL, IMRMOVL };
+
+# Does fetched instruction require a constant word?
+bool need_valC =
+	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IJXX, ICALL, IIADDL };
+
+################ Decode Stage    ###################################
+
+## What register should be used as the A source?
+int srcA = [
+	icode in { IRRMOVL, IRMMOVL, IOPL, IPUSHL  } : rA;
+	icode in { IPOPL, IRET } : RESP;
+	icode in { ILEAVE } : REBP;
+	1 : RNONE; # Don't need register
+];
+
+## What register should be used as the B source?
+int srcB = [
+	icode in { IOPL, IRMMOVL, IMRMOVL, IIADDL  } : rB;
+	icode in { IPUSHL, IPOPL, ICALL, IRET } : RESP;
+	1 : RNONE;  # Don't need register
+];
+
+## What register should be used as the E destination?
+int dstE = [
+	icode in { IRRMOVL } && Cnd : rB;
+	icode in { IIRMOVL, IOPL, IIADDL} : rB;
+	icode in { IPUSHL, IPOPL, ICALL, IRET, ILEAVE } : RESP;
+	1 : RNONE;  # Don't write any register
+];
+
+## What register should be used as the M destination?
+## Acquire data from memory, and send it to a register
+## iaddl doesn't require memory's data
+int dstM = [
+	icode in { IMRMOVL, IPOPL } : rA;
+	icode in { ILEAVE } : REBP;
+	1 : RNONE;  # Don't write any register
+];
+
+################ Execute Stage   ###################################
+
+## Select input A to ALU
+int aluA = [
+	icode in { IRRMOVL, IOPL } : valA;
+	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IIADDL } : valC;
+	icode in { ICALL, IPUSHL } : -4;
+	icode in { IRET, IPOPL, ILEAVE } : 4;
+	# Other instructions don't need ALU
+];
+
+## Select input B to ALU
+int aluB = [
+	icode in { IRMMOVL, IMRMOVL, IOPL, ICALL,
+		      IPUSHL, IRET, IPOPL, IIADDL } : valB;
+	icode in { IRRMOVL, IIRMOVL } : 0;
+	icode in { ILEAVE } : valA;
+	# Other instructions don't need ALU
+];
+
+## Set the ALU function
+int alufun = [
+	icode == IOPL : ifun;
+	1 : ALUADD;
+];
+
+## Should the condition codes be updated?
+bool set_cc = icode in { IOPL, IIADDL };
+
+################ Memory Stage    ###################################
+
+## Set read control signal
+bool mem_read = icode in { IMRMOVL, IPOPL, IRET, ILEAVE };
+
+## Set write control signal
+bool mem_write = icode in { IRMMOVL, IPUSHL, ICALL };
+
+## Select memory address
+int mem_addr = [
+	icode in { IRMMOVL, IPUSHL, ICALL, IMRMOVL } : valE;
+	icode in { IPOPL, IRET, ILEAVE } : valA;
+	# Other instructions don't need address
+];
+
+## Select memory input data
+int mem_data = [
+	# Value from register
+	icode in { IRMMOVL, IPUSHL } : valA;
+	# Return PC
+	icode == ICALL : valP;
+	# Default: Don't write anything
+];
+
+## Determine instruction status
+int Stat = [
+	imem_error || dmem_error : SADR;
+	!instr_valid: SINS;
+	icode == IHALT : SHLT;
+	1 : SAOK;
+];
+
+################ Program Counter Update ############################
+
+## What address should instruction be fetched at
+
+int new_pc = [
+	# Call.  Use instruction constant
+	icode == ICALL : valC;
+	# Taken branch.  Use instruction constant
+	icode == IJXX && Cnd : valC;
+	# Completion of RET instruction.  Use value from stack
+	icode == IRET : valM;
+	# Default: Use incremented PC
+	1 : valP;
+];
+#/* $end seq-all-hcl */
+
+
+\end{lstlisting}
+
 
 \subsubsection{Evaluation}
 
-[In this part, you should place the figures of experiments for your codes, prove the correctness and validate the performance with your own words for each figure’s explanation.]
+\begin{itemize}
+\item Test for $asumi$ \& $asuml$
 
+\includegraphics[width=0.95\textwidth]{asumi.png}
+
+
+\includegraphics[width=0.95\textwidth]{asuml.png}
+\item Retest using the benchmark programs
+
+\includegraphics[width=0.95\textwidth]{benchmark.png}
+
+\item Perform regression tests
+
+\includegraphics[width=0.95\textwidth]{regressionn.png}
+
+\end{itemize}
 \subsection{Part C}
 
 \subsubsection{Analysis}
