@@ -86,13 +86,251 @@
 \subsection{Part A}
 
 \subsubsection{Analysis}
+\begin{itemize}
+\item \textbf{sum.ys}
+ is a program that iteratively sums the elements of a linked list. 
 
-[In this part, you should give an overall analysis for the task, like difficult point, core technique and so on.]
+The basic idea is that we use a conditional jump in a loop which iteratively check whether the next element is equal to zero and if not add up the value to the sum.
 
+\begin{itemize}
+\item In init part, the stack structure is set up, then the program jumps to Main function, and finally halts.
+\item In Main, we first store the first element to the stack before a call to function sum\_list. 
+\item In sum\_list function, we first do the conventions which saves a copy of initial \%ebp and set \%ebp to the beginning of the stack frame. Then we initialize the sum=0, and the go to a loop which iteratively add up elements' value into our sum. 
+\item In loop: firstly, the element pointed to is added and then, we increment the pointer address which make it points to the next element. If the next element is equal to zero, jump to done, otherwise loop agian. 
+\item In done: we resume the \%esp and \%ebp to the initial value set in init part. Then we can safely let Main function return.
+\end{itemize}
+
+\item \textbf{rsum.ys}
+is a program that recursively sums the elements of a linked list. 
+
+This most of the code is similar to the code in sum.ys, except that it should use a function rsum list that recursively sums a list of numbers. 
+
+\begin{itemize}
+\item In rsum\_list, the key idea is that we use \%eax to store the iterative temporary sum meanwhile store the value of the current element in \%edx. Also, a very important point is that we should store the address of the next element(if it is not zero) always in 8(\%ebp), such that in every recursive step, we always update the desired element, which in this case we update $element[i+1]$ with the sum of all elements from $i+1$ to the end.
+\end{itemize}
+\item \textbf{copy.ys} copies a block of words from one part of memory to another (non-overlapping area) area of memory, computing the checksum (Xor) of all the words copied.
+
+\begin{itemize}
+\item The initialization step is similar to the above implementations.
+\item In Main: firstly, the store the src, dest and len into main function stack frame for future use. After these preliminaries, copy block function is called. After returning from copy block, we need to resume the esp and ebp to the initial value set in init part and this is done by "done" function part as similar to above implementations. Finally Main function is returned.
+\item Copy\_block: In copy block, firstly we do the conventions like saving a copy of caller’s ebp and set ebp to the beginning of copy block ’s stack frame. Then we use 3 registers \%ebx \%ecx, \%esi to store temporary needed values for iteration. 
+
+Then set eax to 0, as we use it to store the result. Next we get the pre-stored address of src and dest in Mains frame by using ebp with offset of 8 and 12 respectively. And we set ecx to 3 as used to count the iteration. Now we can get into the loop. In the loop, we need to copy data from src(stored in (\%esi)) to dest(stored in(\%edx)), then update edx, esi and ecx. When ecx goes down to 0, the iteration can stop. Finally, we resume the esp and ebp of Main, and return to Main.
+\end{itemize}
+
+
+\end{itemize}
 \subsubsection{Code}
+\begin{itemize}
+\item \textbf{sum.ys}
+  \begin{lstlisting}[caption={}]
+#Execution begins at address 0
+	.pos	0
+Init:
+	irmovl	Stack, %esp		#Initialize stack pointer
+	irmovl	Stack, %ebp
+	jmp		Main
+	halt
 
-[In this part, you should place your code and make it readable in Microsoft Word, please. Writing necessary comments for codes is a good habit.]
+.align	4
+ele1:
+		.long 0x00a
+		.long ele2
+ele2:
+		.long 0x0b0
+		.long ele3
+ele3:	
+		.long 0xc00
+		.long 0
 
+Main:
+		irmovl	ele1,%esi	#starting pointer
+		pushl	%esi
+		call sum_list	
+		halt
+
+sum_list:
+		pushl	%ebp
+		rrmovl	%esp, %ebp	#read the stack pointer
+		pushl	%ebx		#save sbx
+		pushl	%edx		#save sdx
+		pushl	%esi		#save esi
+		mrmovl	8(%ebp),%ebx	#ebx = starting pointer ele1
+		irmovl	$0,%eax
+loop:	mrmovl	0(%ebx),%edx	#The number
+		addl	%edx,%eax
+		mrmovl	4(%ebx), %esi	#4(%ebx) is address of next node
+		irmovl	$0,%edx
+		addl	%edx,%esi
+		je		done		#If the pointer points to zero return
+		rrmovl	%esi,%ebx
+		jmp		loop
+done:	popl	%esi		#restore the registers
+		popl	%edx
+		popl	%ebx
+		rrmovl	%ebp, %esp
+		popl	%ebp
+		ret
+		.pos	0x400
+Stack:
+
+
+   \end{lstlisting}
+
+
+\item \textbf{rsum.ys}
+  \begin{lstlisting}[caption={}]
+
+#Execution begins at address 0
+	.pos	0
+Init:
+	irmovl	Stack, %esp		#Initialize stack pointer
+	irmovl	Stack, %ebp
+	jmp		Main
+	halt
+
+.align	4
+src:
+	.long	0x00a
+	.long	0x0b0
+	.long	0xc00
+dest:
+	.long	0x111
+	.long	0x222
+	.long	0x333
+result:
+	.long	0
+
+Main:
+		irmovl	result,%esi	#result
+		pushl	%esi
+		irmovl	src,%esi	#src
+		pushl	%esi
+		irmovl	dest,%esi	#dest
+		pushl	%esi
+		irmovl	3,%esi		#len
+		pushl	%esi
+		call copy_list	
+		halt
+
+copy_list:
+		pushl	%ebp
+		rrmovl	%esp, %ebp	#read the stack pointer
+		pushl	%eax		#save eax
+		pushl	%ebx		#save sbx
+		pushl	%ecx		#save ecx
+		pushl	%edx		#save sdx
+		pushl	%esi		#save esi
+		mrmovl	8(%ebp),%eax	#eax=p_len
+		mrmovl	0(%eax),%eax	#eax=len,len-1,...,0
+		mrmovl	20(%ebp),%edx	#edx=p_result
+		irmovl	$0,%ebx			#tmp=0
+		irmovl	$0,%ecx			#ecx=0
+		irmovl	$0,%esi			#esi=0,4,8...
+
+loop:	
+		mrmovl	16(%ebp),%edx	#edx = p_src
+		addl	%esi,%edx		#edx = p_src_cur
+		mrmovl	0(%edx),%edx	#edx = src_cur
+		xorl	%edx,%ecx		#result ^= src_cur
+
+		mrmovl	12(%ebp),%ebx	#ebx = p_dest
+		addl	%esi,%ebx		#ebx = p_dest_cur
+		rmmovl	%edx,0(%ebx)	#*p_dest_cur = src_cur
+
+		irmovl  $1,%ebx			#eax-=1
+		subl	%ebx,%eax		#subl	%ebx,%eax -> eax = eax - ebx
+		je		done
+		irmovl	$4,%ebx			#tmp = 4
+		addl	%ebx,%esi		#esi+=tmp
+		jmp		loop
+done:	rmmovl	%ecx,20(%ebp)	#*p_result = ecx
+		popl	%esi			#restore the registers
+		popl	%edx
+		popl 	%ecx
+		popl	%ebx
+		popl	%eax
+		rrmovl	%ebp, %esp
+		popl	%ebp
+		ret
+
+		.pos	0x120
+Stack:
+   \end{lstlisting}
+
+\item \textbf{copy.ys}
+  \begin{lstlisting}[caption={}]
+#Execution begins at address 0
+	.pos	0
+Init:
+	irmovl	Stack, %esp		#Initialize stack pointer
+	irmovl	Stack, %ebp
+	jmp		Main
+	halt
+
+.align	4
+src:
+	.long	0x00a
+	.long	0x0b0
+	.long	0xc00
+dest:
+	.long	0x111
+	.long	0x222
+	.long	0x333
+
+
+Main:
+		irmovl	src,%esi	#src
+		pushl	%esi
+		irmovl	dest,%esi	#dest
+		pushl	%esi
+		irmovl	$3,%esi		#len
+		pushl	%esi
+		call copy_list	
+		halt
+
+copy_list:
+		pushl	%ebp
+		rrmovl	%esp, %ebp	#read the stack pointer
+		pushl	%ebx		#save sbx
+		pushl	%ecx		#save ecx
+		pushl	%edx		#save sdx
+		pushl	%esi		#save esi
+		mrmovl	8(%ebp),%eax	#eax=len,len-1,...,0
+		irmovl	$0,%ebx			#tmp=0
+		irmovl	$0,%ecx			#ecx=0
+		irmovl	$0,%esi			#esi=0,4,8...
+loop:	
+		mrmovl	16(%ebp),%edx	#edx = p_src
+		addl	%esi,%edx		#edx = p_src_cur
+		mrmovl	0(%edx),%edx	#edx = src_cur
+		xorl	%edx,%ecx		#result ^= src_cur
+
+		mrmovl	12(%ebp),%ebx	#ebx = p_dest
+		addl	%esi,%ebx		#ebx = p_dest_cur
+		rmmovl	%edx,0(%ebx)	#*p_dest_cur = src_cur
+
+		irmovl  $1,%ebx			#eax-=1
+		subl	%ebx,%eax		#subl	%ebx,%eax -> eax = eax - ebx
+		je		done
+		irmovl	$4,%ebx			#tmp = 4
+		addl	%ebx,%esi		#esi+=tmp
+		jmp		loop
+done:	rrmovl	%ecx,%eax
+		popl	%esi			#restore the registers
+		popl	%edx
+		popl 	%ecx
+		popl	%ebx
+		rrmovl	%ebp, %esp
+		popl	%ebp
+		ret
+
+		.pos	0x120
+Stack:
+
+
+   \end{lstlisting}
+\end{itemize}
 \subsubsection{Evaluation}
 
 [In this part, you should place the figures of experiments for your codes, prove the correctness and validate the performance with your own words for each figure’s explanation.]
@@ -101,7 +339,13 @@
 
 \subsubsection{Analysis}
 
-[In this part, you should give an overall analysis for the task, like difficult point, core technique and so on.]
+To add IIADDL to the SEQ processor,we need to know the whole steps that the iaddl operation takes. From the textbook we can know all steps of this operation.
+The steps above is that:
+Firstly, we need to get the icode and ifun which conbine a byte, and we can use M1[PC] to get the first byte.
+Secondly, we need to get which register we begi to use, and we can use M 1[P C + 1] to get the second byte which contains two registers tags.
+Thirdly, we get the rest of the instruction to get the instant value. Then, we begin to decode the instruction which we will get the value in the register and store it in the valB.
+Forthly, we do the add operation which is in the execute step.
+Fifthly, we write the result back to the register and Finally we update the PC to prepare for the next instruction.
 
 \subsubsection{Code}
 
