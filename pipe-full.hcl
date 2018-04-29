@@ -1,18 +1,18 @@
 #/* $begin pipe-all-hcl */
-####################################################################
+###########################################
 #    HCL Description of Control for Pipelined Y86 Processor        #
 #    Copyright (C) Randal E. Bryant, David R. O'Hallaron, 2010     #
-####################################################################
+###########################################
 
 ## Your task is to implement the iaddl and leave instructions
 ## The file contains a declaration of the icodes
 ## for iaddl (IIADDL) and leave (ILEAVE).
 ## Your job is to add the rest of the logic to make it work
 
-####################################################################
-####################################################################
+###########################################
+###########################################
 #                   Leader's name and ID.                          #
-####################################################################
+###########################################
 #Descriptions:							   #
 # Both instructions leave and iaddl are implemented here, which are#
 # similar to those of 'seq'.					   #
@@ -26,7 +26,7 @@
 # hazards. By careful analysis, we decide that ILEAVE can be 	   #
 # grouped with IMRMOVL, IPOPL when coping with data hazards, which #
 # largely reduced complexity of the job.			   #
-####################################################################
+###########################################
 #iaddl Details:							   #
 # 1.instr_valid							   #
 # 2.need_regids							   #
@@ -36,7 +36,7 @@
 # 6.aluA - valC							   #
 # 7.aluB - valB							   #
 # 8.set_cc							   #
-#leave Details:							   # 
+#leave Details:							   #
 # 1.instr_vali							   #
 # 2.need_regids							   #
 # 3.d_srcA - REBP						   #
@@ -50,12 +50,12 @@
 # 11.D_stall							   #
 # 12.D_bubble							   #
 # 13.E_bubble							   #
-####################################################################
-####################################################################
+###########################################
+###########################################
 
-####################################################################
+###########################################
 #    C Include's.  Don't alter these                               #
-####################################################################
+###########################################
 
 quote '#include <stdio.h>'
 quote '#include "isa.h"'
@@ -65,9 +65,9 @@ quote '#include "sim.h"'
 quote 'int sim_main(int argc, char *argv[]);'
 quote 'int main(int argc, char *argv[]){return sim_main(argc,argv);}'
 
-####################################################################
+###########################################
 #    Declarations.  Do not change/remove/delete any of these       #
-####################################################################
+###########################################
 
 ##### Symbolic representation of Y86 Instruction Codes #############
 intsig INOP 	'I_NOP'
@@ -174,9 +174,9 @@ intsig W_valE  'mem_wb_curr->vale'      # ALU E value
 intsig W_dstM 'mem_wb_curr->destm'	# Destination M register ID
 intsig W_valM  'mem_wb_curr->valm'	# Memory M value
 
-####################################################################
+###########################################
 #    Control Signal Definitions.                                   #
-####################################################################
+###########################################
 
 ################ Fetch Stage     ###################################
 
