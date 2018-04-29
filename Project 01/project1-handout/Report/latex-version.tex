@@ -61,9 +61,10 @@
 
 \title{\textbf{Project 1: Optimizing the Performance of a Pipelined Processor}} % Title
 
-\author{515021910302, Chacha Chen, chachachen1997@gmail.com \\
-        001, Yifeng Gao, y-email \\
-        002, Zhixin Ling, z-email, group leader } % Author name and email
+\author{
+        516021910127, Yifeng Gao, xdek@msn.com \\
+        515021910302, Chacha Chen, chachachen1997@gmail.com \\
+        516021910495, Zhixin Ling, 1069066484@qq.com, group leader } % Author name and email
 
 \date{\today} % Date for the report
 
@@ -76,10 +77,10 @@
 
 Throughout this lab, we learned about the design and implementation of a pipelined Y86 processor, optimizing both it and a benchmark program to maximize performance. After this lab, not only did we all have a keen appreciation for the interactions between code and hardware that affect the performance of your programs, but also became more familier with linux operations and computer architecture etc.
 
-In part A, we implemented 3 basic functions using assembly language and in part B,.......in part C.......
+In part A, we implemented 3 basic functions using assembly language and in part B, we implemented new instructions iaddl and leave in the sequence processor and apply iaddl to our Y86 assembly programs. In part C, we implemented new instructions iaddl and leave in the pipeline processor and optimized a program with some optimization techniques and iaddl instruction.
 
 \noindent\textbf{Arrangement:}
-[You should also list the arrangement of each member here. For example, you can write, “student-x finished part A and B, student-y finished part C and student-z finished the report” (of course we suggest each student to make contributions to coding tasks.)]
+Zhixin Ling, as the group leader, finished Part C and the corresponding report section. Chacha Chen and Yifeng Gao work cooperatively on Part A and Part B as well as the corresponding report section and the integration of the report and final hand-in directories.
 
 
 \section{Experiments}
@@ -337,17 +338,17 @@ As is shown above, our implementation can be seen as successful.
 Target register is returned with correct value and also, from the GUI interface, we could see the performance of CPU as well as the decoded machine language denoted by hexadecimal numbers.
 
 \subsection{Part B}
-An operation $iaddl$ added to the control file \textit{seq−full.hcl} to extend the SEQ processor is required in this part.
+An operation $iaddl$ added to the control file \textit{seq−full.hcl} to extend the SEQ processor is required in this part. (Also, leave instruction is also implemented although it is not used in our y86 programs so we are not going to details about leave.)
 \subsubsection{Analysis}
 To add $iaddl$ to the SEQ processor, the steps is as follows:
 
 \begin{enumerate}
-\item $M_1[PC]$ is used to get the icode and ifun which conbine a byte.
-\item  we need to get which register we begi to use, and we can use M 1[P C + 1] to get the second byte which contains two registers tags.
-Thirdly, we get the rest of the instruction to get the instant value. 
+\item $M_1[PC]$ is used to get the icode and ifun which combine a byte.
+\item  As indicated in the binary code of iaddl, the lower 4 bits of M1[pC+1] are used, so register rB is the register to add with the constant value, while the higher 4 bits of M1[pC+1] is F, indicating rA is not valid. \\
+    Then, we get the rest lower 4 bytes of the instruction to get the instant value.
 \item Decode the instruction by which we could get the value in the register and store it in the valB.
 \item Execute the add operation.
-\item Write the result back to the register and Finally update the PC to prepare for the next instruction.
+\item Write the result back to the register and Finally update the PC to prepare for the next instruction. The updated PC should be PC+6 since the length of iaddl instruction is designed to be 6 bytes.
 \end{enumerate}
 
 

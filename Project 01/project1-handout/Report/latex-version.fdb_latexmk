@@ -1,9 +1,9 @@
 # Fdb version 3
-["xdvipdfmx"] 1525007027 "latex-version.xdv" "latex-version.pdf" "latex-version" 1525007027
-  "latex-version.xdv" 1525007027 197212 ba05daf62a6647d6e38c001ebeacbf3c "xelatex"
+["xdvipdfmx"] 1525015812 "latex-version.xdv" "latex-version.pdf" "latex-version" 1525015815
+  "latex-version.xdv" 1525015812 1305744 272636b95183abd041389602de20cbe0 "xelatex"
   (generated)
   "latex-version.pdf"
-["xelatex"] 1525007026 "latex-version.tex" "latex-version.xdv" "latex-version" 1525007027
+["xelatex"] 1525015811 "latex-version.tex" "latex-version.xdv" "latex-version" 1525015815
   "/usr/local/texlive/2017/texmf-dist/fonts/map/fontname/texfonts.map" 1480098670 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1480098698 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -49,10 +49,22 @@
   "/usr/local/texlive/2017/texmf-dist/web2c/texmf.cnf" 1494087824 32646 eadc4ca26cdbe7105ac7c593aa8c4f72 ""
   "/usr/local/texlive/2017/texmf-var/web2c/xetex/xelatex.fmt" 1520140291 3678518 360cae1edb57addf5feef5bd838e5bcc ""
   "/usr/local/texlive/2017/texmf.cnf" 1495593465 577 2b71d4d888f9e5560b2e99985915a9fa ""
-  "latex-version.aux" 1525007027 1314 fb37576aecac6648f58437814d800ba7 ""
-  "latex-version.tex" 1525007026 11967 1713094df7a6195d69f9cf3a283d93de ""
+  "A-rsum.png" 1525007543 579751 93fe9cec63ac1cdb6714f481744e0aa8 ""
+  "A-sum.png" 1525007536 836825 832e559805d271d0d62375fcc84a40ea ""
+  "asumi.png" 1525008771 410255 691fb7d41741b9167821a7df24c19108 ""
+  "asuml.png" 1525008785 478277 30063cd0ddf9a6947517da2287ab43fb ""
+  "benchmark.png" 1525009210 538059 b29022d88e2242b6f4dedd85e827fc25 ""
+  "copy.png" 1525007762 379458 582644b0fabcce3132299bfd381e9171 ""
+  "latex-version.aux" 1525015812 1322 b8a00ede7aefad1436b9e7c53d75c93b ""
+  "latex-version.tex" 1525015811 53852 2a18b83bb480ed52d9f3226e99ce2865 ""
+  "pipe_CPE.png" 1525006166 41812 c99ccb11e47158ad00f634e9f9aac872 ""
+  "pipe_ISACheck.png" 1525006166 172086 c3df3129348f5a68743dfbccd9867fe1 ""
+  "pipe_checklen.png" 1525006166 33819 342b3b26c07ced5d02de32a8e8c20744 ""
+  "pipe_correctness.png" 1525006166 14193 ada6861f840ec25cd32fedec56de882a ""
+  "regressionn.png" 1525009608 1147708 423ef5c144c9e3aed5b5480e2efdf707 ""
+  "rsum.png" 1525007744 513987 a0c96c972c61c62b91174f17f3d3c196 ""
+  "sum.png" 1525007725 76383 351a43e6c5cb6e1ce6eda890700fc70f ""
   (generated)
   "latex-version.aux"
   "latex-version.xdv"
-  "latex-version.out"
   "latex-version.log"
